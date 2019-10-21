@@ -17,13 +17,13 @@ namespace OneDriveApiBrowser
         private bool _selected;
         private GraphServiceClient graphClient;
 
-        public OneDriveTile(GraphServiceClient graphClient)
+        public OneDriveTile (GraphServiceClient graphClient)
         {
             this.graphClient = graphClient;
-            InitializeComponent();
+            InitializeComponent ();
         }
 
-        public DriveItem SourceItem 
+        public DriveItem SourceItem
         {
             get { return _sourceItem; }
             set
@@ -32,19 +32,19 @@ namespace OneDriveApiBrowser
                     return;
 
                 _sourceItem = value;
-                SourceItemChanged();
+                SourceItemChanged ();
             }
         }
 
-        private void SourceItemChanged()
+        private void SourceItemChanged ()
         {
             if (null == _sourceItem) return;
             labelName.Text = _sourceItem.Name;
 
-            LoadThumbnail();
+            LoadThumbnail ();
         }
 
-        private async void LoadThumbnail()
+        private async void LoadThumbnail ()
         {
             var thumbnail = await this.ThumbnailUrlAsync("medium");
             if (null != thumbnail)
@@ -55,12 +55,12 @@ namespace OneDriveApiBrowser
         }
 
         /// <summary>
-        /// Retrieve a specific size thumbnail's metadata. If it isn't already 
+        /// Retrieve a specific size thumbnail's metadata. If it isn't already
         /// available make a call to the service to retrieve it.
         /// </summary>
         /// <param name="size"></param>
         /// <returns></returns>
-        public async Task<Microsoft.Graph.Thumbnail> ThumbnailUrlAsync(string size = "large")
+        public async Task<Microsoft.Graph.Thumbnail> ThumbnailUrlAsync (string size = "large")
         {
             bool loadedThumbnails = this._sourceItem != null && this._sourceItem.Thumbnails != null &&
                                     this._sourceItem.Thumbnails.CurrentPage != null;
@@ -70,22 +70,25 @@ namespace OneDriveApiBrowser
                 Thumbnail thumbnail = null;
                 ThumbnailSet thumbnailSet = null;
 
-                switch (size.ToLower())
+                switch (size.ToLower ())
                 {
                     case "small":
-                        thumbnailSet = this._sourceItem.Thumbnails.CurrentPage.FirstOrDefault(set => set.Small != null);
+                        thumbnailSet = this._sourceItem.Thumbnails.CurrentPage.FirstOrDefault (set => set.Small != null);
                         thumbnail = thumbnailSet == null ? null : thumbnailSet.Small;
                         break;
+
                     case "medium":
-                        thumbnailSet = this._sourceItem.Thumbnails.CurrentPage.FirstOrDefault(set => set.Medium != null);
+                        thumbnailSet = this._sourceItem.Thumbnails.CurrentPage.FirstOrDefault (set => set.Medium != null);
                         thumbnail = thumbnailSet == null ? null : thumbnailSet.Medium;
                         break;
+
                     case "large":
-                        thumbnailSet = this._sourceItem.Thumbnails.CurrentPage.FirstOrDefault(set => set.Large != null);
+                        thumbnailSet = this._sourceItem.Thumbnails.CurrentPage.FirstOrDefault (set => set.Large != null);
                         thumbnail = thumbnailSet == null ? null : thumbnailSet.Large;
                         break;
+
                     default:
-                        thumbnailSet = this._sourceItem.Thumbnails.CurrentPage.FirstOrDefault(set => set[size] != null);
+                        thumbnailSet = this._sourceItem.Thumbnails.CurrentPage.FirstOrDefault (set => set[size] != null);
                         thumbnail = thumbnailSet == null ? null : thumbnailSet[size];
                         break;
                 }
@@ -94,7 +97,6 @@ namespace OneDriveApiBrowser
                 {
                     return thumbnail;
                 }
-
             }
 
             if (!loadedThumbnails)
@@ -102,12 +104,11 @@ namespace OneDriveApiBrowser
                 try
                 {
                     // Try to load the thumbnail from the service if we haven't loaded thumbnails.
-                    return await this.graphClient.Drive.Items[this._sourceItem.Id].Thumbnails["0"][size].Request().GetAsync();
+                    return await this.graphClient.Me.Drive.Items[this._sourceItem.Id].Thumbnails["0"][size].Request ().GetAsync ();
                 }
                 catch (ServiceException)
                 {
-
-                    // Just swallow not found. We don't want an error popup and we just won't render a thumbnail
+                    // Just swallow not found. We don't want an error pop up and we just won't render a thumbnail
                     return null;
                 }
             }
@@ -115,14 +116,14 @@ namespace OneDriveApiBrowser
             return null;
         }
 
-        private void Control_Click(object sender, EventArgs e)
+        private void Control_Click (object sender, EventArgs e)
         {
-            OnClick(EventArgs.Empty);
+            OnClick (EventArgs.Empty);
         }
 
-        private void Control_DoubleClick(object sender, EventArgs e)
+        private void Control_DoubleClick (object sender, EventArgs e)
         {
-            OnDoubleClick(EventArgs.Empty);
+            OnDoubleClick (EventArgs.Empty);
         }
 
         public bool Selected
@@ -133,7 +134,7 @@ namespace OneDriveApiBrowser
                 if (value != _selected)
                 {
                     _selected = value;
-                    labelName.Font = _selected ? new Font(labelName.Font, FontStyle.Bold) : new Font(labelName.Font, FontStyle.Regular);
+                    labelName.Font = _selected ? new Font (labelName.Font, FontStyle.Bold) : new Font (labelName.Font, FontStyle.Regular);
                 }
             }
         }
@@ -155,6 +156,5 @@ namespace OneDriveApiBrowser
         //            color, width, style);
         //    }
         //}
-
     }
 }

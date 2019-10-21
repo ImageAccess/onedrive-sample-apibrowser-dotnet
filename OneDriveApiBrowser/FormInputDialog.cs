@@ -2,23 +2,15 @@
 //  Copyright (c) Microsoft Corporation.  All Rights Reserved.  Licensed under the MIT License.  See License in the project root for license information.
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OneDriveApiBrowser
 {
     public partial class FormInputDialog : Form
     {
-        public FormInputDialog(string title, string prompt)
+        public FormInputDialog (string title, string prompt)
         {
-            InitializeComponent();
+            InitializeComponent ();
             this.Text = title;
             this.InputPrompt = prompt;
         }

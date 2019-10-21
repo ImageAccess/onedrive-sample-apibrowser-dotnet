@@ -12,9 +12,9 @@ namespace OneDriveApiBrowser
 
     public partial class FormBrowser : Form
     {
-        public const string MsaClientId = "Insert your client ID here";
-        public const string MsaReturnUrl = "urn:ietf:wg:oauth:2.0:oob";
-
+        public const string MsaClientId = "46632d85-114e-4b65-b3c9-41519cabb217";
+        public const string MsaReturnUrl = "https://login.microsoftonline.com/common/oauth2/nativeclient"; //"urn:ietf:wg:oauth:2.0:oob";
+        //public const string MsaReturnUrl = "urn:ietf:wg:oauth:2.0:oob";
 
         private enum ClientType
         {
@@ -58,9 +58,13 @@ namespace OneDriveApiBrowser
                     : "thumbnails,children";
 
                 var folder =
-                    await this.graphClient.Drive.Items[id].Request().Expand(expandString).GetAsync();
+                    // This for SharePoint...
+                    //await this.graphClient.Drive.Items[id].Request().Expand(expandString).GetAsync();
 
-                ProcessFolder(folder);
+                    // This for Personal OneDrive...
+                    await this.graphClient.Me.Drive.Items[id].Request().Expand(expandString).GetAsync();
+
+                ProcessFolder (folder);
             }
             catch (Exception exception)
             {
@@ -88,19 +92,23 @@ namespace OneDriveApiBrowser
 
                 if (path == null)
                 {
-                    folder = await this.graphClient.Drive.Root.Request().Expand(expandValue).GetAsync();
+                    // This for SharePoint
+                    //folder = await this.graphClient.Drive.Root.Request().Expand(expandValue).GetAsync();
+                    
+                    // This for Personal OneDrive
+                    folder = await this.graphClient.Me.Drive.Root.Request ().Expand (expandValue).GetAsync ();
+
                 }
                 else
                 {
-                    folder =
-                        await
-                            this.graphClient.Drive.Root.ItemWithPath("/" + path)
-                                .Request()
-                                .Expand(expandValue)
-                                .GetAsync();
+                    // This for SharePoint
+                    //folder = await this.graphClient.Drive.Root.ItemWithPath("/" + path).Request().Expand(expandValue).GetAsync();
+
+                    // This for Personal OneDrive
+                    folder = await this.graphClient.Me.Drive.Root.ItemWithPath ("/" + path).Request ().Expand (expandValue).GetAsync ();
                 }
 
-                ProcessFolder(folder);
+                ProcessFolder (folder);
             }
             catch (Exception exception)
             {
@@ -172,6 +180,7 @@ namespace OneDriveApiBrowser
             // Look up the object by ID
             NavigateToFolder(item);
         }
+        
         void ChildObject_Click(object sender, EventArgs e)
         {
             if (null != _selectedTile)
@@ -228,7 +237,6 @@ namespace OneDriveApiBrowser
             DriveItem item = link.Tag as DriveItem;
             if (null == item)
             {
-
                 Task t = LoadFolderFromPath(null);
             }
             else
@@ -275,15 +283,12 @@ namespace OneDriveApiBrowser
             }
             catch (ServiceException exception)
             {
-
-             PresentServiceException(exception);
-
+                PresentServiceException(exception);
             }
 
             try
             {
                 await LoadFolderFromPath();
-
                 UpdateConnectedStateUx(true);
             }
             catch (ServiceException exception)
@@ -349,7 +354,7 @@ namespace OneDriveApiBrowser
                     {
                         var uploadedItem =
                             await
-                                this.graphClient.Drive.Root.ItemWithPath(uploadPath).Content.Request().PutAsync<DriveItem>(stream);
+                                this.graphClient.Me.Drive.Root.ItemWithPath(uploadPath).Content.Request().PutAsync<DriveItem>(stream);
 
                         AddItemToFolderContents(uploadedItem);
 
@@ -376,7 +381,7 @@ namespace OneDriveApiBrowser
                     {
                         var uploadedItem =
                             await
-                                this.graphClient.Drive.Items[targetFolder.Id].ItemWithPath(filename).Content.Request()
+                                this.graphClient.Me.Drive.Items[targetFolder.Id].ItemWithPath(filename).Content.Request()
                                     .PutAsync<DriveItem>(stream);
 
                         AddItemToFolderContents(uploadedItem);
@@ -401,7 +406,7 @@ namespace OneDriveApiBrowser
                 {
                     var folderToCreate = new DriveItem { Name = dialog.InputText, Folder = new Folder() };
                     var newFolder =
-                        await this.graphClient.Drive.Items[this.SelectedItem.Id].Children.Request()
+                        await this.graphClient.Me.Drive.Items[this.SelectedItem.Id].Children.Request()
                             .AddAsync(folderToCreate);
 
                     if (newFolder != null)
@@ -446,7 +451,7 @@ namespace OneDriveApiBrowser
             {
                 try
                 {
-                    await this.graphClient.Drive.Items[itemToDelete.Id].Request().DeleteAsync();
+                    await this.graphClient.Me.Drive.Items[itemToDelete.Id].Request().DeleteAsync();
                     
                     RemoveItemFromFolderContents(itemToDelete);
                     MessageBox.Show("Item was deleted successfully");
@@ -463,7 +468,7 @@ namespace OneDriveApiBrowser
             try
             {
                 var result =
-                    await this.graphClient.Drive.Items[this.CurrentFolder.Id].Delta().Request().GetAsync();
+                    await this.graphClient.Me.Drive.Items[this.CurrentFolder.Id].Delta().Request().GetAsync();
 
                 foreach ( DriveItem item in result)
                 {
@@ -497,7 +502,7 @@ namespace OneDriveApiBrowser
             if (result != System.Windows.Forms.DialogResult.OK)
                 return;
 
-            using (var stream = await this.graphClient.Drive.Items[item.Id].Content.Request().GetAsync())
+            using (var stream = await this.graphClient.Me.Drive.Items[item.Id].Content.Request().GetAsync())
             using (var outputStream = new System.IO.FileStream(dialog.FileName, System.IO.FileMode.Create))
             {
                 await stream.CopyToAsync(outputStream);

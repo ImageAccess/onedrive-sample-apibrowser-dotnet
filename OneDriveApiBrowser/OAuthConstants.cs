@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OneDriveApiBrowser
+﻿namespace OneDriveApiBrowser
 {
     public static class OAuthConstants
     {
@@ -17,6 +11,5 @@ namespace OneDriveApiBrowser
         public const string ExpiresInKeyName = "expires_in";
         public const string ErrorKeyName = "error";
         public const string ErrorDescriptionKeyName = "error_description";
-
     }
 }
