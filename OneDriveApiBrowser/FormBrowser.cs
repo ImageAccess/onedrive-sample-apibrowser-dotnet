@@ -23,6 +23,7 @@ namespace OneDriveApiBrowser
         }
 
         private const int UploadChunkSize = 10 * 1024 * 1024;       // 10 MB
+        
         //private IOneDriveClient oneDriveClient { get; set; }
         private GraphServiceClient graphClient { get; set; }
         private ClientType clientType { get; set; }
