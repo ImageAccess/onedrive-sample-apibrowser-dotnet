@@ -12,6 +12,7 @@ namespace OneDriveApiBrowser
     {
         // The Client ID is used by the application to uniquely identify itself to the v2.0 authentication endpoint.
         private static string clientId = FormBrowser.MsaClientId;
+
         private static string redirectURI = FormBrowser.MsaReturnUrl;
 
         public static string[] Scopes = { "Files.ReadWrite Files.ReadWrite.All" };
@@ -19,8 +20,9 @@ namespace OneDriveApiBrowser
         public static PublicClientApplicationBuilder IdentityClientAppBuilder = PublicClientApplicationBuilder.Create (clientId)
             .WithRedirectUri (redirectURI)
             .WithAuthority(AzureCloudInstance.AzurePublic, "common");
+
         public static IPublicClientApplication IdentityClientApp = IdentityClientAppBuilder.Build();
-        
+
         public static IAccount Account;
         public static string TokenForUser = null;
         public static DateTimeOffset Expiration;
@@ -66,7 +68,7 @@ namespace OneDriveApiBrowser
             AuthenticationResult authResult;
             try
             {
-                authResult = await IdentityClientApp.AcquireTokenSilent (Scopes, Account).ExecuteAsync();
+                authResult = await IdentityClientApp.AcquireTokenSilent (Scopes, Account).ExecuteAsync ();
                 TokenForUser = authResult.AccessToken;
             }
             catch (Exception)

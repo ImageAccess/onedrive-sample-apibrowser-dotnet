@@ -23,34 +23,34 @@ namespace OneDriveApiBrowser
         }
 
         private const int UploadChunkSize = 10 * 1024 * 1024;       // 10 MB
-        
+
         //private IOneDriveClient oneDriveClient { get; set; }
         private GraphServiceClient graphClient { get; set; }
+
         private ClientType clientType { get; set; }
         private DriveItem CurrentFolder { get; set; }
         private DriveItem SelectedItem { get; set; }
 
         private OneDriveTile _selectedTile;
 
-        public FormBrowser()
+        public FormBrowser ()
         {
-            InitializeComponent();
+            InitializeComponent ();
         }
 
-        private void ShowWork(bool working)
+        private void ShowWork (bool working)
         {
             this.UseWaitCursor = working;
             this.progressBar1.Visible = working;
-
         }
 
-        private async Task LoadFolderFromId(string id)
+        private async Task LoadFolderFromId (string id)
         {
             if (null == this.graphClient) return;
 
             // Update the UI for loading something new
-            ShowWork(true);
-            LoadChildren(new DriveItem[0]);
+            ShowWork (true);
+            LoadChildren (new DriveItem[0]);
 
             try
             {
@@ -69,19 +69,19 @@ namespace OneDriveApiBrowser
             }
             catch (Exception exception)
             {
-                PresentServiceException(exception);
+                PresentServiceException (exception);
             }
 
-            ShowWork(false);
+            ShowWork (false);
         }
 
-        private async Task LoadFolderFromPath(string path = null)
+        private async Task LoadFolderFromPath (string path = null)
         {
             if (null == this.graphClient) return;
 
             // Update the UI for loading something new
-            ShowWork(true);
-            LoadChildren(new DriveItem[0]);
+            ShowWork (true);
+            LoadChildren (new DriveItem[0]);
 
             try
             {
@@ -95,10 +95,9 @@ namespace OneDriveApiBrowser
                 {
                     // This for SharePoint
                     //folder = await this.graphClient.Drive.Root.Request().Expand(expandValue).GetAsync();
-                    
+
                     // This for Personal OneDrive
                     folder = await this.graphClient.Me.Drive.Root.Request ().Expand (expandValue).GetAsync ();
-
                 }
                 else
                 {
@@ -113,58 +112,58 @@ namespace OneDriveApiBrowser
             }
             catch (Exception exception)
             {
-                PresentServiceException(exception);
+                PresentServiceException (exception);
             }
 
-            ShowWork(false);
+            ShowWork (false);
         }
 
-        private void ProcessFolder(DriveItem folder)
+        private void ProcessFolder (DriveItem folder)
         {
             if (folder != null)
             {
                 this.CurrentFolder = folder;
 
-                LoadProperties(folder);
+                LoadProperties (folder);
 
                 if (folder.Folder != null && folder.Children != null && folder.Children.CurrentPage != null)
                 {
-                    LoadChildren(folder.Children.CurrentPage);
+                    LoadChildren (folder.Children.CurrentPage);
                 }
             }
         }
 
-        private void LoadProperties(DriveItem item)
+        private void LoadProperties (DriveItem item)
         {
             this.SelectedItem = item;
             objectBrowser.SelectedItem = item;
         }
 
-        private void LoadChildren(IList<DriveItem> items)
+        private void LoadChildren (IList<DriveItem> items)
         {
-            flowLayoutContents.SuspendLayout();
-            flowLayoutContents.Controls.Clear();
+            flowLayoutContents.SuspendLayout ();
+            flowLayoutContents.Controls.Clear ();
 
             // Load the children
             foreach (var obj in items)
             {
-                AddItemToFolderContents(obj);
+                AddItemToFolderContents (obj);
             }
 
-            flowLayoutContents.ResumeLayout();
+            flowLayoutContents.ResumeLayout ();
         }
 
-        private void AddItemToFolderContents(DriveItem obj)
+        private void AddItemToFolderContents (DriveItem obj)
         {
-            flowLayoutContents.Controls.Add(CreateControlForChildObject(obj));
+            flowLayoutContents.Controls.Add (CreateControlForChildObject (obj));
         }
 
-        private void RemoveItemFromFolderContents(DriveItem itemToDelete)
+        private void RemoveItemFromFolderContents (DriveItem itemToDelete)
         {
-            flowLayoutContents.Controls.RemoveByKey(itemToDelete.Id);
+            flowLayoutContents.Controls.RemoveByKey (itemToDelete.Id);
         }
 
-        private Control CreateControlForChildObject(DriveItem item)
+        private Control CreateControlForChildObject (DriveItem item)
         {
             OneDriveTile tile = new OneDriveTile(this.graphClient);
             tile.SourceItem = item;
@@ -174,33 +173,32 @@ namespace OneDriveApiBrowser
             return tile;
         }
 
-        void ChildObject_DoubleClick(object sender, EventArgs e)
+        private void ChildObject_DoubleClick (object sender, EventArgs e)
         {
             var item = ((OneDriveTile)sender).SourceItem;
 
             // Look up the object by ID
-            NavigateToFolder(item);
+            NavigateToFolder (item);
         }
-        
-        void ChildObject_Click(object sender, EventArgs e)
+
+        private void ChildObject_Click (object sender, EventArgs e)
         {
             if (null != _selectedTile)
             {
                 _selectedTile.Selected = false;
             }
-            
+
             var item = ((OneDriveTile)sender).SourceItem;
-            LoadProperties(item);
+            LoadProperties (item);
             _selectedTile = (OneDriveTile)sender;
             _selectedTile.Selected = true;
         }
 
-        private void FormBrowser_Load(object sender, EventArgs e)
+        private void FormBrowser_Load (object sender, EventArgs e)
         {
-            
         }
 
-        private void NavigateToFolder(DriveItem folder)
+        private void NavigateToFolder (DriveItem folder)
         {
             Task t = LoadFolderFromId(folder.Id);
 
@@ -211,7 +209,7 @@ namespace OneDriveApiBrowser
             {
                 if (crumb.Tag == folder)
                 {
-                    RemoveDeeperBreadcrumbs(crumb);
+                    RemoveDeeperBreadcrumbs (crumb);
                     existingCrumb = true;
                     break;
                 }
@@ -221,19 +219,19 @@ namespace OneDriveApiBrowser
             {
                 LinkLabel label = new LinkLabel();
                 label.Text = "> " + folder.Name;
-                label.LinkArea = new LinkArea(2, folder.Name.Length);
+                label.LinkArea = new LinkArea (2, folder.Name.Length);
                 label.LinkClicked += linkLabelBreadcrumb_LinkClicked;
                 label.AutoSize = true;
                 label.Tag = folder;
-                flowLayoutPanelBreadcrumb.Controls.Add(label);
+                flowLayoutPanelBreadcrumb.Controls.Add (label);
             }
         }
 
-        private void linkLabelBreadcrumb_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void linkLabelBreadcrumb_LinkClicked (object sender, LinkLabelLinkClickedEventArgs e)
         {
             LinkLabel link = (LinkLabel)sender;
 
-            RemoveDeeperBreadcrumbs(link);
+            RemoveDeeperBreadcrumbs (link);
 
             DriveItem item = link.Tag as DriveItem;
             if (null == item)
@@ -246,23 +244,23 @@ namespace OneDriveApiBrowser
             }
         }
 
-        private void RemoveDeeperBreadcrumbs(LinkLabel link)
+        private void RemoveDeeperBreadcrumbs (LinkLabel link)
         {
             // Remove the breadcrumbs deeper than this item
             var breadcrumbs = flowLayoutPanelBreadcrumb.Controls;
             int indexOfControl = breadcrumbs.IndexOf(link);
             for (int i = breadcrumbs.Count - 1; i > indexOfControl; i--)
             {
-                breadcrumbs.RemoveAt(i);
+                breadcrumbs.RemoveAt (i);
             }
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void exitToolStripMenuItem_Click (object sender, EventArgs e)
         {
-            this.Close();
+            this.Close ();
         }
 
-        private void UpdateConnectedStateUx(bool connected)
+        private void UpdateConnectedStateUx (bool connected)
         {
             signInMsaToolStripMenuItem.Visible = !connected;
             signOutToolStripMenuItem.Visible = connected;
@@ -270,46 +268,45 @@ namespace OneDriveApiBrowser
             flowLayoutContents.Visible = connected;
         }
 
-        private async void signInMsaToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void signInMsaToolStripMenuItem_Click (object sender, EventArgs e)
         {
-            await this.SignIn();
+            await this.SignIn ();
         }
 
-        private async Task SignIn()
+        private async Task SignIn ()
         {
-
             try
             {
-                this.graphClient = AuthenticationHelper.GetAuthenticatedClient();
+                this.graphClient = AuthenticationHelper.GetAuthenticatedClient ();
             }
             catch (ServiceException exception)
             {
-                PresentServiceException(exception);
+                PresentServiceException (exception);
             }
 
             try
             {
-                await LoadFolderFromPath();
-                UpdateConnectedStateUx(true);
+                await LoadFolderFromPath ();
+                UpdateConnectedStateUx (true);
             }
             catch (ServiceException exception)
             {
-                PresentServiceException(exception);
+                PresentServiceException (exception);
                 this.graphClient = null;
             }
         }
 
-        private void signOutToolStripMenuItem_Click(object sender, EventArgs e)
+        private void signOutToolStripMenuItem_Click (object sender, EventArgs e)
         {
             if (this.graphClient != null)
             {
-                AuthenticationHelper.SignOut();
+                AuthenticationHelper.SignOut ();
             }
 
-            UpdateConnectedStateUx(false);
+            UpdateConnectedStateUx (false);
         }
 
-        private System.IO.Stream GetFileStreamForUpload(string targetFolderName, out string originalFilename)
+        private System.IO.Stream GetFileStreamForUpload (string targetFolderName, out string originalFilename)
         {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Title = "Upload to " + targetFolderName;
@@ -324,23 +321,23 @@ namespace OneDriveApiBrowser
 
             try
             {
-                originalFilename = System.IO.Path.GetFileName(dialog.FileName);
-                return new System.IO.FileStream(dialog.FileName, System.IO.FileMode.Open);
+                originalFilename = System.IO.Path.GetFileName (dialog.FileName);
+                return new System.IO.FileStream (dialog.FileName, System.IO.FileMode.Open);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error uploading file: " + ex.Message);
+                MessageBox.Show ("Error uploading file: " + ex.Message);
                 originalFilename = null;
                 return null;
             }
         }
 
-        private async void simpleUploadToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void simpleUploadToolStripMenuItem_Click (object sender, EventArgs e)
         {
             var targetFolder = this.CurrentFolder;
 
             string filename;
-            using (var stream = GetFileStreamForUpload(targetFolder.Name, out filename))
+            using (var stream = GetFileStreamForUpload (targetFolder.Name, out filename))
             {
                 if (stream != null)
                 {
@@ -357,24 +354,24 @@ namespace OneDriveApiBrowser
                             await
                                 this.graphClient.Me.Drive.Root.ItemWithPath(uploadPath).Content.Request().PutAsync<DriveItem>(stream);
 
-                        AddItemToFolderContents(uploadedItem);
+                        AddItemToFolderContents (uploadedItem);
 
-                        MessageBox.Show("Uploaded with ID: " + uploadedItem.Id);
+                        MessageBox.Show ("Uploaded with ID: " + uploadedItem.Id);
                     }
                     catch (Exception exception)
                     {
-                        PresentServiceException(exception);
+                        PresentServiceException (exception);
                     }
                 }
             }
         }
 
-        private async void simpleIDbasedToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void simpleIDbasedToolStripMenuItem_Click (object sender, EventArgs e)
         {
             var targetFolder = this.CurrentFolder;
 
             string filename;
-            using (var stream = GetFileStreamForUpload(targetFolder.Name, out filename))
+            using (var stream = GetFileStreamForUpload (targetFolder.Name, out filename))
             {
                 if (stream != null)
                 {
@@ -385,23 +382,23 @@ namespace OneDriveApiBrowser
                                 this.graphClient.Me.Drive.Items[targetFolder.Id].ItemWithPath(filename).Content.Request()
                                     .PutAsync<DriveItem>(stream);
 
-                        AddItemToFolderContents(uploadedItem);
+                        AddItemToFolderContents (uploadedItem);
 
-                        MessageBox.Show("Uploaded with ID: " + uploadedItem.Id);
+                        MessageBox.Show ("Uploaded with ID: " + uploadedItem.Id);
                     }
                     catch (Exception exception)
                     {
-                        PresentServiceException(exception);
+                        PresentServiceException (exception);
                     }
                 }
             }
         }
 
-        private async void createFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void createFolderToolStripMenuItem_Click (object sender, EventArgs e)
         {
             FormInputDialog dialog = new FormInputDialog("Create Folder", "New folder name:");
             var result = dialog.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrEmpty(dialog.InputText))
+            if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrEmpty (dialog.InputText))
             {
                 try
                 {
@@ -412,23 +409,22 @@ namespace OneDriveApiBrowser
 
                     if (newFolder != null)
                     {
-                        MessageBox.Show("Created new folder with ID " + newFolder.Id);
-                        this.AddItemToFolderContents(newFolder);
+                        MessageBox.Show ("Created new folder with ID " + newFolder.Id);
+                        this.AddItemToFolderContents (newFolder);
                     }
                 }
-                catch(ServiceException exception)
+                catch (ServiceException exception)
                 {
-                    PresentServiceException(exception);
-
+                    PresentServiceException (exception);
                 }
                 catch (Exception exception)
                 {
-                    PresentServiceException(exception);
+                    PresentServiceException (exception);
                 }
             }
         }
 
-        private static void PresentServiceException(Exception exception)
+        private static void PresentServiceException (Exception exception)
         {
             string message = null;
             var oneDriveException = exception as ServiceException;
@@ -438,13 +434,13 @@ namespace OneDriveApiBrowser
             }
             else
             {
-                message = string.Format("{0}{1}", Environment.NewLine, oneDriveException.ToString());
+                message = string.Format ("{0}{1}", Environment.NewLine, oneDriveException.ToString ());
             }
 
-            MessageBox.Show(string.Format("OneDrive reported the following error: {0}", message));
+            MessageBox.Show (string.Format ("OneDrive reported the following error: {0}", message));
         }
 
-        private async void deleteSelectedItemToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void deleteSelectedItemToolStripMenuItem_Click (object sender, EventArgs e)
         {
             var itemToDelete = this.SelectedItem;
             var result = MessageBox.Show("Are you sure you want to delete " + itemToDelete.Name + "?", "Confirm Delete", MessageBoxButtons.YesNo);
@@ -452,47 +448,46 @@ namespace OneDriveApiBrowser
             {
                 try
                 {
-                    await this.graphClient.Me.Drive.Items[itemToDelete.Id].Request().DeleteAsync();
-                    
-                    RemoveItemFromFolderContents(itemToDelete);
-                    MessageBox.Show("Item was deleted successfully");
+                    await this.graphClient.Me.Drive.Items[itemToDelete.Id].Request ().DeleteAsync ();
+
+                    RemoveItemFromFolderContents (itemToDelete);
+                    MessageBox.Show ("Item was deleted successfully");
                 }
                 catch (Exception exception)
                 {
-                    PresentServiceException(exception);
+                    PresentServiceException (exception);
                 }
             }
         }
 
-        private async void getChangesHereToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void getChangesHereToolStripMenuItem_Click (object sender, EventArgs e)
         {
             try
             {
                 var result =
                     await this.graphClient.Me.Drive.Items[this.CurrentFolder.Id].Delta().Request().GetAsync();
 
-                foreach ( DriveItem item in result)
+                foreach (DriveItem item in result)
                 {
-                    Console.WriteLine(item.Name);
+                    Console.WriteLine (item.Name);
                 }
             }
             catch (Exception ex)
             {
-                PresentServiceException(ex);
+                PresentServiceException (ex);
             }
         }
 
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void menuStrip1_ItemClicked (object sender, ToolStripItemClickedEventArgs e)
         {
-
         }
 
-        private async void saveSelectedFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void saveSelectedFileToolStripMenuItem_Click (object sender, EventArgs e)
         {
             var item = this.SelectedItem;
             if (null == item)
             {
-                MessageBox.Show("Nothing selected.");
+                MessageBox.Show ("Nothing selected.");
                 return;
             }
 
@@ -503,10 +498,10 @@ namespace OneDriveApiBrowser
             if (result != System.Windows.Forms.DialogResult.OK)
                 return;
 
-            using (var stream = await this.graphClient.Me.Drive.Items[item.Id].Content.Request().GetAsync())
-            using (var outputStream = new System.IO.FileStream(dialog.FileName, System.IO.FileMode.Create))
+            using (var stream = await this.graphClient.Me.Drive.Items[item.Id].Content.Request ().GetAsync ())
+            using (var outputStream = new System.IO.FileStream (dialog.FileName, System.IO.FileMode.Create))
             {
-                await stream.CopyToAsync(outputStream);
+                await stream.CopyToAsync (outputStream);
             }
         }
     }
